@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import os
+import json
+import pickle
+import sys
+import traceback
+
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from imblearn.over_sampling import SMOTE
+
+from aux_functions import process_df
+
+# Estas rutas son necesarias para Sagemaker
+prefix = '/opt/ml/'
+
+input_path = prefix + 'input/data'
+output_path = os.path.join(prefix, 'output')
+model_path = os.path.join(prefix, 'model')
+
+# Este algoritmo tiene un único canal de datos de entrada llamado "training"
+channel_name = 'training'
+training_path = os.path.join(input_path, channel_name)
+
+# Función para ejecutar el entrenamiento
+def train():
+    print('Empezando el entrenamiento.')
+    try:
+        # Lee el conjunto de archivos y los concatena en un solo DataFrame
+        input_files = [os.path.join(training_path, file) for file in os.listdir(training_path)]
+        if len(input_files) == 0:
+            raise ValueError(('No hay ficheros en {}').format(training_path))
+        raw_data = [pd.read_csv(file, index_col=False) for file in input_files]
+        train_data = pd.concat(raw_data)
+
+        # Procesamos el dataset con la función auxiliar del script aux_functions.py
+        train_X, train_y = process_df(train_data, model_path, "train")
+    
+        # Sobremuestreo de la clase minoritaria utilizando SMOTE
+        over_sampling = SMOTE(random_state = 0)
+        os_smote_X, os_smote_y = over_sampling.fit_resample(train_X, train_y)
+        os_smote_X = pd.DataFrame(data = os_smote_X, columns = train_X.columns)
+        os_smote_y = pd.DataFrame(data = os_smote_y, columns = train_y.columns)
+
+        # Creamos el modelo
+        model = LogisticRegression(
+            C=1.0, class_weight=None, dual=False, fit_intercept=True,
+            intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+            penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+            verbose=0, warm_start=False)
+
+        # Entrenamos el modelo
+        model.fit(os_smote_X, os_smote_y)
+
+        # Guardamos el modelo
+        with open(os.path.join(model_path, 'model.pkl'), 'wb') as out:
+            pickle.dump(model, out)
+        print('Training complete.')
+
+    except Exception as e:
+        # Escribe un fichero de error si el entrenamiento falla
+        trc = traceback.format_exc()
+        with open(os.path.join(output_path, 'failure'), 'w') as s:
+            s.write('Excepción durante el entrenamiento: ' + str(e) + '\n' + trc)
+        print('Excepción durante el entrenamiento: ' + str(e) + '\n' + trc, file=sys.stderr)
+        sys.exit(255)
+
+if __name__ == '__main__':
+    train()
+
+    sys.exit(0)

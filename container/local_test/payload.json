@@ -1,0 +1,27 @@
+{
+    "data": 
+    [
+        {
+            "customerID": "8433-WXGNA",
+            "gender": "Male",
+            "SeniorCitizen":0,
+            "Partner": "No",
+            "Dependents": "No",
+            "tenure": 2,
+            "PhoneService": "Yes",
+            "MultipleLines": "No",
+            "InternetService": "Fiber optic",
+            "OnlineSecurity": "Yes",
+            "OnlineBackup": "No",
+            "DeviceProtection": "No",
+            "TechSupport": "No",
+            "StreamingTV": "No",
+            "StreamingMovies": "No",
+            "Contract": "Month-to-month",
+            "PaperlessBilling": "Yes",
+            "PaymentMethod": "Electronic check",
+            "MonthlyCharges": 75.7,
+            "TotalCharges": 189.2
+        }
+    ]
+}
