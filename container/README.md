@@ -1,4 +1,4 @@
-# Árbol de Clasificación con SciKit-Learn y Amazon Sagemaker
+# ML en producción con Docker & Sagemaker
 
 Dentro del contenedor Docker tenemos esta estructura:
 ```
