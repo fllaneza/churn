@@ -2,7 +2,7 @@
 # This is a Python 3 image that uses the nginx, gunicorn, flask stack
 # for serving inferences in a stable way.
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
          wget \
@@ -13,10 +13,10 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN ln -s /usr/bin/pip3 /usr/bin/pip
+#RUN ln -s /usr/bin/pip3 /usr/bin/pip
 
 COPY requirements.txt ./requirements.txt 
-RUN pip --no-cache-dir install -r ./requirements.txt 
+RUN pip3 --no-cache-dir install -r ./requirements.txt 
 
 ENV PYTHONUNBUFFERED=TRUE
 ENV PYTHONDONTWRITEBYTECODE=TRUE
